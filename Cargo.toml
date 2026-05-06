@@ -1,0 +1,10 @@
+[package]
+name = "fleet-topology"
+version = "0.1.0"
+edition = "2021"
+description = "Fleet topology analyzer — visualize Laman rigidity, H1 emergence, and ZHC consensus as a geometric graph"
+repository = "https://github.com/SuperInstance/fleet-topology"
+license = "MIT"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
