@@ -54,12 +54,18 @@ This is GOOD for Byzantine tolerance but means H¹ > V-2.
 
 ## Math Reference
 
+> **⚠️ Note on vertex degree:** Laman's theorem does NOT bound vertex degree. A Laman-rigid graph can have vertices of arbitrarily high degree (up to V-1). What Laman's theorem guarantees:
+> - Edge count: E = 2V - 3 (for minimally rigid, connected, 2D, generic position)
+> - Subgraph condition: Every subgraph with v' vertices has E' ≤ 2v' - 3
+> - Degree: Unbounded (K4 is Laman-rigid with degree 3; larger graphs can have higher degree)
+
 | Metric | Formula | Meaning |
 |--------|---------|---------|
-| Laman rigidity | E ≈ 2V-3 | Exactly enough edges for rigidity |
+| Laman rigidity | E = 2V-3 | Exactly enough edges for rigidity (connected, 2D, generic) |
+| Laman subgraph | E' ≤ 2v' - 3 | Every subgraph also satisfies edge bound |
 | H¹ Betti number | β₁ = E-V+1 | Number of independent cycles |
-| Emergence | E > 2V-3 | Redundant paths = emergent patterns |
-| Self-coordinating | rigid + no emergence | ✓ provable, no voting |
+| Emergence | E > 2V-3 | Redundant paths = emergent patterns (connected graph) |
+| Self-coordinating | rigid + no emergence | ✓ provable, no voting (connected) |
 
 ## Related
 
