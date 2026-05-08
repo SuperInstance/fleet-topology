@@ -69,6 +69,6 @@ This is GOOD for Byzantine tolerance but means H¹ > V-2.
 
 ## Related
 
-- `fleet-coordinate` — mathematical core (ZHC, beam, Laman, H1)
-- `fleet-manifest` — fleet inventory
-- `pythagorean48-codes` — trust vector encoding
+- **[fleet-coordinate](https://github.com/SuperInstance/fleet-coordinate)** — mathematical core (ZHC, beam, Laman, H1)
+- **[fleet-manifest](https://github.com/SuperInstance/fleet-manifest)** — fleet inventory
+- **[pythagorean48-codes](https://github.com/SuperInstance/pythagorean48-codes)** — trust vector encoding
