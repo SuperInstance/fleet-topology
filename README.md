@@ -1,5 +1,15 @@
 # Fleet Topology
 
+
+## Meta
+
+**Domain:** agent-coordination
+**Depends on:** fleet-coordinate
+**Depended by:** fleet-homology, fleet-constraint
+**Implements:** network-topology, agent-routing, connectivity-graph
+**Related:** fleet-coordinate, fleet-manifest, beacon-protocol
+
+
 **How the fleet is connected. Agent graph, routing topology, and neighbor discovery.**
 
 The fleet is not a flat network. Agents have roles, trust relationships, and physical constraints — some are on the same machine, some communicate over the network, some are on microcontrollers that wake once a minute to relay data.
