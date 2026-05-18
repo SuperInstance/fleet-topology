@@ -1,6 +1,8 @@
 # Fleet Topology
 
 
+![CI](https://github.com/SuperInstance/fleet-topology/actions/workflows/ci.yml/badge.svg)
+
 ## Meta
 
 **Domain:** agent-coordination
