@@ -22,11 +22,11 @@ The fleet is not a flat network. Agents have roles, trust relationships, and phy
 
 ## What It Provides
 
-**Agent connectivity** — the directed graph of who can reach whom. Edges have weights: latency, bandwidth, trust score.
+**Agent connectivity** — the directed graph of who can reach whom. Edges have weights: latency, bandwidth, trust score. (implemented)
 
-**Routing topology** — given a destination and a message priority, find the best path. For trusted fleet messages, prefer direct edges. For broadcast messages, use spanning tree.
+**Routing topology** — given a destination and a message priority, find the best path. For trusted fleet messages, prefer direct edges. For broadcast messages, use spanning tree. (stub, not yet implemented)
 
-**Neighbor discovery** — agents discover their neighbors through [beacon-protocol](https://github.com/SuperInstance/beacon-protocol) heartbeats and register their topology in a shared graph. The fleet graph is always up to date within one beacon interval.
+**Neighbor discovery** — agents discover their neighbors through [beacon-protocol](https://github.com/SuperInstance/beacon-protocol) heartbeats and register their topology in a shared graph. The fleet graph is always up to date within one beacon interval. (stub, not yet implemented)
 
 ---
 

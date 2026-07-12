@@ -51,11 +51,14 @@ impl Topology {
 
     /// Compute Laman rigidity check
     /// Laman-rigid: E = 2V - 3 (within 5% tolerance)
-    pub fn lamant_rigid(&self) -> (bool, f64) {
+    pub fn laman_rigid(&self) -> (bool, f64) {
         let V = self.V();
         let E = self.E();
-        let expected = 2 * V.saturating_sub(3);
-        let ratio = if expected > 0 { E as f64 / expected as f64 } else { 1.0 };
+        if V < 2 {
+            return (false, 0.0);
+        }
+        let expected = 2 * V - 3;            // V≥2  ⇒  expected ≥ 1
+        let ratio = E as f64 / expected as f64;
         ((ratio - 1.0).abs() < 0.05, ratio)
     }
 
@@ -79,30 +82,36 @@ impl Topology {
 
     /// Self-coordinating: rigid + H1 tells you how many redundant paths
     pub fn rigidity_report(&self) -> RigidityReport {
-        let (is_rigid, ratio) = self.lamant_rigid();
+        let (is_rigid, ratio) = self.laman_rigid();
         let h1 = self.h1_cohomology();
-        let emergence = self.has_emergence();
         let V = self.V();
         let E = self.E();
         let threshold = 2 * V.saturating_sub(3);
+        let emergence = self.has_emergence();
+
+        let status = if V < 2 {
+            RigidityStatus::Unknown
+        } else if is_rigid && !emergence {
+            RigidityStatus::SelfCoordinating
+        } else if is_rigid && emergence {
+            RigidityStatus::OverConstrained
+        } else if !is_rigid && E > threshold {
+            RigidityStatus::OverConstrained
+        } else if !is_rigid && E < threshold {
+            RigidityStatus::UnderConstrained
+        } else {
+            RigidityStatus::Unknown
+        };
 
         RigidityReport {
             is_rigid,
             V,
             E,
-            lamant_expected: threshold,
+            laman_expected: threshold,
             ratio,
             h1_cohomology: h1,
             has_emergence: emergence,
-            status: if is_rigid && !emergence {
-                RigidityStatus::SelfCoordinating
-            } else if is_rigid && emergence {
-                RigidityStatus::OverConstrained
-            } else if !is_rigid {
-                RigidityStatus::UnderConstrained
-            } else {
-                RigidityStatus::Unknown
-            },
+            status,
         }
     }
 
@@ -142,7 +151,7 @@ pub struct RigidityReport {
     pub is_rigid: bool,
     pub V: usize,
     pub E: usize,
-    pub lamant_expected: usize,
+    pub laman_expected: usize,
     pub ratio: f64,
     pub h1_cohomology: usize,
     pub has_emergence: bool,
@@ -176,7 +185,7 @@ pub fn print_topology(t: &Topology) -> String {
          Laman: E={}/{} (ratio={:.2}) → {}\n\
          H¹ = {} (β₁ = E-V+1)\n\
          \n",
-        t.V(), t.E(), t.E(), report.lamant_expected, report.ratio,
+        t.V(), t.E(), t.E(), report.laman_expected, report.ratio,
         report.status.label(),
         report.h1_cohomology,
     );
@@ -206,23 +215,28 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_five_vessel_fleet() {
-        // 5 vessels, complete graph: V=5, E=10, expected=7, ratio=1.43
+    fn test_empty_topology() {
+        let t = Topology::new();
+        let report = t.rigidity_report();
+        assert_eq!(report.V, 0);
+        assert_eq!(report.E, 0);
+        assert!(!report.is_rigid);
+        assert_eq!(report.h1_cohomology, 0);
+        assert!(!report.has_emergence);
+        assert_eq!(report.status, RigidityStatus::Unknown);
+    }
+
+    #[test]
+    fn test_two_nodes_one_edge() {
         let vessels = vec![
-            (1, "oracle1".to_string(), 1.00, true),
-            (2, "fm".to_string(), 0.85, true),
-            (3, "jc1".to_string(), 0.75, false),
-            (4, "ccc".to_string(), 0.70, true),
-            (5, "probe".to_string(), 0.50, true),
+            (1, "a".to_string(), 0.8, true),
+            (2, "b".to_string(), 0.8, true),
         ];
         let t = Topology::from_vessels(&vessels);
-        assert_eq!(t.V(), 5);
-        assert_eq!(t.E(), 10);
-        
         let report = t.rigidity_report();
-        assert!(!report.is_rigid); // Complete graph is over-rigid (E >> 2V-3)
-        assert!(report.has_emergence);
-        assert_eq!(report.h1_cohomology, 6); // E-V+1 = 10-5+1 = 6
+        assert!(report.is_rigid);
+        assert!(!report.has_emergence);
+        assert_eq!(report.status, RigidityStatus::SelfCoordinating);
     }
 
     #[test]
@@ -237,6 +251,28 @@ mod tests {
         let report = t.rigidity_report();
         assert!(report.is_rigid);
         assert!(!report.has_emergence);
+        assert_eq!(report.status, RigidityStatus::SelfCoordinating);
+    }
+
+    #[test]
+    fn test_five_vessel_fleet() {
+        // 5 vessels, complete graph: V=5, E=10, expected=7, ratio=1.43
+        let vessels = vec![
+            (1, "oracle1".to_string(), 1.00, true),
+            (2, "fm".to_string(), 0.85, true),
+            (3, "jc1".to_string(), 0.75, false),
+            (4, "ccc".to_string(), 0.70, true),
+            (5, "probe".to_string(), 0.50, true),
+        ];
+        let t = Topology::from_vessels(&vessels);
+        assert_eq!(t.V(), 5);
+        assert_eq!(t.E(), 10);
+
+        let report = t.rigidity_report();
+        assert!(!report.is_rigid);             // not within 5% of 2V-3
+        assert!(report.has_emergence);         // E > 2V-3
+        assert_eq!(report.h1_cohomology, 6);   // E-V+1 = 10-5+1 = 6
+        assert_eq!(report.status, RigidityStatus::OverConstrained);
     }
 
     #[test]
